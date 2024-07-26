@@ -130,4 +130,76 @@ does nothing with it. To suppress error messages from a command, we do this:
 >The bit bucket is an ancient Unix concept: https://en.wikipedia.org/wiki/Null_device A lot of nerds love to make jokes
 >using /dev/null, like sending your messages to /dev/null :)
 
+**Redirecting standard input**
+
+The cat (concatenate files) command reads one or more files and copies them to standard output like so:
+
+```console
+cat [file]
+```
+
+Since `cat` can accept more than one file as an argument, it can also be used to join files together. Say we have
+downloaded a large file that has been split into multiple parts, and we want to join them back together. This happens
+a lot for my work when we have to deal with large csv files that split into pieces. If the files were named:
+
+```
+iad_1.csv, iad_2.csv, ..., iad_99.csv
+```
+
+we could rejoin them with this command:
+
+```
+$ cat iad_*.csv > iad_99.csv
+```
+
+Since wildcards always expand in sorted order, the arguments will be arranged in the correct order.
+
+*What if we don't give any input to cat?*
+
+```
+> $ cat
+```
+
+If cat is not given any arguments, it reads from standard input, and since standard input is, by default, attached to
+the keyboard, it's waiting for us to type something.
+
+Try this:
+
+```
+ $ cat
+Razorbill is the best bird on the earth.
+Razorbill is the best bird on the earth.
+```
+
+Next, type `CTRL-D` to tell `cat` that it has reached *end-of-file (EOF)* on standard input.
+
+In the absence of filename arguments, `cat` copies standard input to standard output, so we see our line of text
+repeated. We can use this behavior to create short text files. Say we wanted to create a file called *I_love_cat.txt*
+containing the text in our example, we would do this:
+
+```
+ $ cat > I_love_cat.txt
+Razorbill is the best bird on the earth, but cat can hunt them.
+```
+
+And then to see the reuslt:
+
+```
+ $ cat I_love_cat.txt
+Razorbill is the best bird on the earth, but cat can hunt them.
+```
+
+Now that we know how `cat` accepts standard input in addition to filename arguments, let's try redirecting standard
+input:
+
+```
+ $ cat < I_love_cat.txt
+Razorbill is the best bird on the earth, but cat can hunt them.
+```
+
+Using the `<` redirection operator, we change the source of standard input from the keyboard to the file
+`I_love_cat.txt` This is not particularly useful compared to passing a filename argument, but it serves to demonstrate
+using a file as a source of standard input. Other commands make better use of standard input, I will cover them soon.
+
+Also, check out the man page for cat, it has several interesting options.
 

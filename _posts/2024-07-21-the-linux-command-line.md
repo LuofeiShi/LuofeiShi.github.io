@@ -203,3 +203,76 @@ using a file as a source of standard input. Other commands make better use of st
 
 Also, check out the man page for cat, it has several interesting options.
 
+#### Pipelines
+
+The ability of commands to read data from standard input and send to standard output is utilized by a shell feature
+called *pipelines*. Using the pipeline operator `|` (vertical bar), the standard output of one command can be *piped*
+into the standard input of another.
+
+```
+command1 | command2
+```
+
+>The first Computer System course I took in college assigned a homework to write a shell, and writing the pipeline part
+>literally took me a week. Well, mostly debugging. But there are so many edge cases to take care of!
+
+To fully demonstrate this:
+
+```
+ $ ls -l /usr | less
+```
+
+This extremely handy! We can converniently examine the output of any command that produces standard output.
+
+**Filter**
+
+Pipelines are often used to perform complex operations on data. It is possible to put several commands together into
+a pipeline. Frequently, the commands used this way are referred to as *filters*. Filters take input, change it somehow,
+and then output it. The first one we will try is sort. Imagine we want to make a combined list of all of the executable
+program in `/bin` and `/usr/bin`, put them in sorted order, and then view the list:
+
+```
+ $ ls /bin /usr/bin | sort | less
+```
+
+Since we specified two directories (`/bin` and `/usr/bin`), the output of `ls` would have consisted of two sorted lists,
+one for each directory. By including `sort`in our pipeline, we changed the data to producea single, sorted list.
+
+**uniq--report or omit repeated lines**
+
+The `uniq` command is often used in conjunction with `sort`. `uniq` accepts a sorted list of data from either standard
+input or a single filename argument (see the `uniq` man page for details) and, by default, removes any duplicates from
+the list. So, to make sure our list has no duplicates (that is, programs of the same name that appears in both the `bin`
+and `usr/bin` directories) we will add `uniq` to our pipeline:
+
+```console
+ $ ls /bin /usr/bin | sort | uniq | less
+```
+
+In this example, we use `uniq` to remove any duplicates from the output of the `sort` command. If we want to see the
+list of duplicates instead, we add the `-d` option to `uniq` like so:
+
+```
+ $ ls /bin /usr/bin | sort | uniq -d | less
+```
+
+**wc--print line, word, and byte counts**
+
+The `wc` (word count) command is used to display the number of lines, words, and bytes contained in files. For example:
+
+```
+ $ wc ls_output.log
+        1       7      40 ls_output.log
+```
+
+In this case it prints out three numbers: lines, words, and bytes contained in `ls_output.txt`. Liek our previous
+commands, if executed without command-line arguments, `wc` accepts standard input. The `-l` option limits its output to
+only report lines. Adding it to a pipeline is a handy way to count things. To see the number of items we have in our
+sorted list, we can do this:
+
+```
+ $ ls /bin /usr/bin | sort | uniq | wc -l
+    1023
+```
+
+

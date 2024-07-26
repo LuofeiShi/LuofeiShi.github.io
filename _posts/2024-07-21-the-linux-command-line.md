@@ -1,4 +1,4 @@
-## The Linux Command Line notes
+## The Linux Command Line notes -- Redirection
 
 ### Redirection
 
@@ -275,4 +275,112 @@ sorted list, we can do this:
     1023
 ```
 
+**grep--print lines matching a pattern**
 
+`grep` is a powerful program used to find text patterns within files, like this:
+
+```
+grep pattern [file...]
+```
+
+When `grep` encounters a "pattern" in the file, it prints out the lines containing it. The patterns that grep can match
+can be very complex, but for now we will concentrate on simple text matches.
+
+Let's say we want to find all the files in our list of program that have the word `zip` in the name. Such a search might
+give us an idea of which programs on our system have something to do with file compression. We would do this:
+
+```console
+ $ ls /bin /usr/bin | sort | uniq | grep zip
+bunzip2
+bzip2
+bzip2recover
+funzip
+gunzip
+gzip
+...
+```
+There are a couple of handy option for grep: `-i`, which causes grep to ignore case when performing the search (normally
+searches are case sensitive) and `-v`, which tells grep to print only lines that do not match the pattern.
+
+**head/tail--print first/last part of files**
+
+Sometimes you don't want all the output from a command. You may just want the first or last couple lines. The `head`
+command prints the first 10 lines of a file, and the `tail` command prints the last 10 lines. By default, both commands
+print 10 lines of text, but this can be adjusted with the `-n` option:
+
+```console
+ $ head -n 5 adobegc.log
+07/13/24 10:04:17:479 | [INFO] |  |  |  | AdobeGCInvokerUtilityHelper |  |  | 5405 | AdobeGCInvokerUtility : inside getLatestGCApplication
+07/13/24 10:04:17:482 | [INFO] |  |  |  | AdobeGCUpdater |  |  | 5405 | ***********AdobeGC Updater library invoked = 8.4.0.73 ************
+07/13/24 10:04:17:482 | [INFO] |  |  |  | AdobeGCUpdaterCFU |  |  | 5405 | Perform WF started
+07/13/24 10:04:17:482 | [INFO] |  |  |  | AdobeGCUpdaterCFU |  |  | 5405 | Perform WF completed
+07/13/24 10:04:17:482 | [ERROR] |  |  |  | AdobeGCInvokerUtilityHelper |  |  | 5405 | AdobeGCInvokerUtility :inside waitForCFUCallBack.
+```
+
+These can be used in pipelines as well:
+
+```console
+ $ ls /usr/bin | tail -n 5
+zipsplit
+zless
+zmore
+znew
+zprint
+```
+
+`tail` has an option that allows you to view files in real time. This is very useful for my work when I need to
+bootstrap an application and need to trace log for signals or errors:
+
+```
+ $ tail -f /var/logs/keybagd.log.0
+
+Thu Jul 25 02:54:29 2024 [118] <err> (0x700001897000) analytics_send_fv_status: AnalyticsEvent: fv_enabled: 0, fv_users_count: 1, icloud_recovery_key: 1, institutional_recovery_key: 0, personal_recovery_key: 0, mdm_recovery_key: 0, installer_user: 0, icloud_recovery_user: 1, institutional_recovery_user: 0, vek_device_protected: 0, vek_ephemeral: 0, vek_is_owner: 0, vek_boot_policy: 0, vek_imported: 0, kek_sidp_count: 0, kek_ps_count: 0, kek_last_count: 0, kek_imported_count: 0, kek_bad_sig_count: 0, kek_xart_policy_missing_count: 0, kek_ps_missing_count: 0
+Thu Jul 25 02:54:29 2024 [118] <err> (0x700001897000) analytics_send_passcode_status: AnalyticsEvent: is_set: 1, type: 0, activation_status: 0
+Thu Jul 25 20:46:34 2024 [118] <err> (0x70000191a000) data_analytics_init_block_invoke: data analytics activity
+Thu Jul 25 20:46:34 2024 [118] <err> (0x70000191a000) analytics_send_kek_stats: AnalyticsEvent: xart_policy: 1, xart_policy_enforced: 0, xart_policy_missing: 0
+Thu Jul 25 20:46:34 2024 [118] <err> (0x70000191a000) analytics_send_kek_stats: AnalyticsEvent: xart_policy: 1, xart_policy_enforced: 0, xart_policy_missing: 0
+Thu Jul 25 20:46:34 2024 [118] <err> (0x70000191a000) dump_fv_blob_state: failed to get blob_state: (e007c013)
+
+Thu Jul 25 20:46:34 2024 [118] <err> (0x70000191a000) analytics_send_fv_status: AnalyticsEvent: fv_enabled: 0, fv_users_count: 1, icloud_recovery_key: 1, institutional_recovery_key: 0, personal_recovery_key: 0, mdm_recovery_key: 0, installer_user: 0, icloud_recovery_user: 1, institutional_recovery_user: 0, vek_device_protected: 0, vek_ephemeral: 0, vek_is_owner: 0, vek_boot_policy: 0, vek_imported: 0, kek_sidp_count: 0, kek_ps_count: 0, kek_last_count: 0, kek_imported_count: 0, kek_bad_sig_count: 0, kek_xart_policy_missing_count: 0, kek_ps_missing_count: 0
+Thu Jul 25 20:46:34 2024 [118] <err> (0x70000191a000) analytics_send_passcode_status: AnalyticsEvent: is_set: 1, type: 0, activation_status: 0
+```
+
+Using the `-f` option, tail continues to monitor the file and when new lines are appended, they immediately appear on
+the display. This continues until you type `CTRL-C`.
+
+**tee--read from stdin and output to stdout and files**
+
+In keeping with our plumbing analogy, Linux provides a command called tee which creates a "T" fitting on our pipe. The
+tee program reads standard input and copies it to both standard output (allowing the data to continue down the pipeline)
+and to one or more files. This is useful for capturing a pipeline's contents at an intermediate stage of processing.
+here we repeat one of our earlier example, this time including tee to capture the entire directory listing to the file
+`ls.txt` before grep filter the pipeline's contents:
+
+```
+ $ ls /usr/bin | tee ls.txt | grep zip
+bunzip2
+bzip2
+bzip2recover
+funzip
+gunzip
+gzip
+streamzip
+unzip
+unzipsfx
+zip
+zipcloak
+zipdetails
+zipdetails5.30
+zipdetails5.34
+zipgrep
+zipinfo
+zipnote
+zipsplit
+```
+
+#### Final note
+
+Check out the documentation of each of the commands we have covered in this blog. We have seen only their most basic
+usage, and they all have a nuber of interesting options. As we gain Linux experience, we will see that the redirection
+feature of the command line is extremely useful for solving specialized problems. Many commands make use of standard
+input and output, and almost all command-line programs use standard error to display their informative messages.
